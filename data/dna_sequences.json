@@ -1,0 +1,15 @@
+{
+    "sequences": [
+        "ATCG",
+        "GCTA",
+        "TACG",
+        "CGAT"
+    ],
+
+        "neurons": [
+        {"position": [0.0, 0.0, 0.0]},
+        {"position": [1.0, 1.0, 1.0]},
+        {"position": [-1.0, -1.0, -1.0]}
+    ]
+
+}
