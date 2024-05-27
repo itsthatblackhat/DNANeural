@@ -1,12 +1,15 @@
 from OpenGL.GL import *
 from math import sin, cos, pi
 import numpy as np
+from visualization.physics import PhysicsObject
 
 class Shape:
     def __init__(self, color, shape_id, coord_manager):
         self.color = color
         self.shape_id = shape_id
         self.coord_manager = coord_manager
+        self.physics = PhysicsObject(self)
+        self.init_position()
 
     def draw(self):
         pass
@@ -18,6 +21,10 @@ class Shape:
 
     def reset_transformations(self):
         glPopMatrix()
+
+    def init_position(self):
+        if self.shape_id not in self.coord_manager.positions:
+            self.coord_manager.update_position(self.shape_id, (0.0, 0.0, 0.0))
 
 class Point(Shape):
     def __init__(self, x, y, color, shape_id, coord_manager):
@@ -58,6 +65,7 @@ class Triangle(Shape):
         self.apply_transformations()
         glBegin(GL_TRIANGLES)
         glColor3f(*self.color)
+        glNormal3f(0.0, 0.0, 1.0)
         glVertex3f(0.0, 1.0, 0.0)
         glVertex3f(-1.0, -1.0, 0.0)
         glVertex3f(1.0, -1.0, 0.0)
@@ -72,6 +80,7 @@ class Square(Shape):
         self.apply_transformations()
         glBegin(GL_QUADS)
         glColor3f(*self.color)
+        glNormal3f(0.0, 0.0, 1.0)
         glVertex3f(-1.0, -1.0, 0.0)
         glVertex3f(1.0, -1.0, 0.0)
         glVertex3f(1.0, 1.0, 0.0)
@@ -150,18 +159,22 @@ class Pyramid(Shape):
         glBegin(GL_TRIANGLES)
         glColor3f(*self.color)
         # Front
+        glNormal3f(0.0, 0.5, 0.5)
         glVertex3f(0.0, 1.0, 0.0)
         glVertex3f(-1.0, -1.0, 1.0)
         glVertex3f(1.0, -1.0, 1.0)
         # Right
+        glNormal3f(0.5, 0.5, 0.0)
         glVertex3f(0.0, 1.0, 0.0)
         glVertex3f(1.0, -1.0, 1.0)
         glVertex3f(1.0, -1.0, -1.0)
         # Back
+        glNormal3f(0.0, 0.5, -0.5)
         glVertex3f(0.0, 1.0, 0.0)
         glVertex3f(1.0, -1.0, -1.0)
         glVertex3f(-1.0, -1.0, -1.0)
         # Left
+        glNormal3f(-0.5, 0.5, 0.0)
         glVertex3f(0.0, 1.0, 0.0)
         glVertex3f(-1.0, -1.0, -1.0)
         glVertex3f(-1.0, -1.0, 1.0)
@@ -180,6 +193,7 @@ class Circle(Shape):
         self.apply_transformations()
         glBegin(GL_TRIANGLE_FAN)
         glColor3f(*self.color)
+        glNormal3f(0.0, 0.0, 1.0)
         glVertex2f(self.x, self.y)
         for i in range(361):
             angle = 2 * pi * i / 360
