@@ -1,4 +1,3 @@
-# audio_listener.py
 import pyaudio
 import numpy as np
 
@@ -7,9 +6,6 @@ class AudioListener:
         self.rate = rate
         self.chunk = chunk
         self.audio_interface = pyaudio.PyAudio()
-        self.stream = None
-
-    def start_stream(self):
         self.stream = self.audio_interface.open(format=pyaudio.paInt16, channels=1,
                                                 rate=self.rate, input=True,
                                                 frames_per_buffer=self.chunk)
@@ -27,4 +23,5 @@ class AudioListener:
             self.stream = None
 
     def __del__(self):
+        self.stop_stream()
         self.audio_interface.terminate()

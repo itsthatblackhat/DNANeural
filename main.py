@@ -2,64 +2,96 @@ import pygame
 from OpenGL.GL import *
 from OpenGL.GLU import *
 from pygame import DOUBLEBUF, OPENGL
+from math import sin, cos, pi
 
-from visualization.shapes import Point, Line, Triangle, Square, Cube, Sphere, Pyramid, Circle
+from visualization.activity_visualizer import ActivityVisualizer
+from network.input_handler import InputHandler
+from models.dna_neural_network import DNANeuralNetwork
+from neuron import Neuron
 from visualization.coordinate_manager import CoordinateManager
-from visualization.particle_system import ParticleSystem
-from core.camera import Camera  # Ensure Camera is correctly imported
-
-
-def update_physics(objects, dt):
-    for obj in objects:
-        obj.physics.update(dt)
-
+from audio_listener import AudioListener
+from camera_listener import CameraListener
 
 def main():
     pygame.init()
     display = (800, 600)
     pygame.display.set_mode(display, DOUBLEBUF | OPENGL)
+    glViewport(0, 0, display[0], display[1])
+    glMatrixMode(GL_PROJECTION)
+    gluPerspective(45, (display[0] / display[1]), 0.1, 50.0)
+    glMatrixMode(GL_MODELVIEW)
+    glClearColor(0.0, 0.0, 0.0, 1.0)
+    glEnable(GL_DEPTH_TEST)
+
+    print("OpenGL initialization complete")
+
     coord_manager = CoordinateManager()
-
-    shapes = [
-        Cube(color=(1.0, 0.0, 0.0), shape_id=1, coord_manager=coord_manager),
-        Triangle(color=(0.0, 1.0, 0.0), shape_id=2, coord_manager=coord_manager),
-        Circle(x=0.0, y=0.0, radius=1, color=(0.0, 0.0, 1.0), shape_id=3, coord_manager=coord_manager)
+    neurons = [
+        Neuron((0.0, 0.0, 0.0), (1.0, 0.0, 0.0), 'sphere', coord_manager),
+        Neuron((1.0, 1.0, 1.0), (0.0, 1.0, 0.0), 'sphere', coord_manager),
+        Neuron((-1.0, -1.0, -1.0), (0.0, 0.0, 1.0), 'sphere', coord_manager)
     ]
+    dna_network = DNANeuralNetwork(neurons, coord_manager)
+    visualizer = ActivityVisualizer(dna_network)
+    print("Visualizer and DNA network initialization complete")
 
-    coord_manager.update_position(1, (-2.0, 0.0, -10.0))
-    coord_manager.update_position(2, (2.0, 0.0, -10.0))
-    coord_manager.update_position(3, (0.0, 0.0, -5.0))
-
-    particle_system = ParticleSystem(coord_manager, num_particles=100)
+    audio_listener = AudioListener()
+    print("Audio listener initialized")
 
     clock = pygame.time.Clock()
     running = True
+    camera_pos = [0.0, 0.0, -5.0]
+    camera_rot = [0.0, 0.0]
 
-    camera = Camera(display)  # Initialize Camera
+    def handle_camera_movement(keys):
+        move_speed = 0.02
+        rotate_speed = 0.06
+
+        if keys[pygame.K_w]:
+            camera_pos[0] += move_speed * sin(camera_rot[1] * pi / 180)
+            camera_pos[2] -= move_speed * cos(camera_rot[1] * pi / 180)
+        if keys[pygame.K_s]:
+            camera_pos[0] -= move_speed * sin(camera_rot[1] * pi / 180)
+            camera_pos[2] += move_speed * cos(camera_rot[1] * pi / 180)
+        if keys[pygame.K_a]:
+            camera_pos[0] -= move_speed * cos(camera_rot[1] * pi / 180)
+            camera_pos[2] -= move_speed * sin(camera_rot[1] * pi / 180)
+        if keys[pygame.K_d]:
+            camera_pos[0] += move_speed * cos(camera_rot[1] * pi / 180)
+            camera_pos[2] += move_speed * sin(camera_rot[1] * pi / 180)
+        if keys[pygame.K_SPACE]:
+            camera_pos[1] -= move_speed
+        if keys[pygame.K_c]:
+            camera_pos[1] += move_speed
+        if keys[pygame.K_q]:
+            camera_rot[1] -= rotate_speed
+        if keys[pygame.K_e]:
+            camera_rot[1] += rotate_speed
+
+    print("Entering main loop")
 
     while running:
-        dt = clock.tick() / 1000.0  # Delta time in seconds
+        dt = clock.tick() / 1000.0
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
-            camera.handle_event(event)  # Handle camera events
+
+        keys = pygame.key.get_pressed()
+        handle_camera_movement(keys)
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
-        camera.update()
-
-        update_physics(shapes, dt)
-        particle_system.update(dt)
-
-        for shape in shapes:
-            shape.draw()
-
-        particle_system.draw()
-
+        glLoadIdentity()
+        glRotatef(camera_rot[0], 1, 0, 0)
+        glRotatef(camera_rot[1], 0, 1, 0)
+        glTranslatef(-camera_pos[0], -camera_pos[1], -camera_pos[2])
+        visualizer.update(dt)
+        visualizer.render()
         pygame.display.flip()
+        print("Frame rendered")
 
+    audio_listener.__del__()
     pygame.quit()
-
 
 if __name__ == "__main__":
     main()

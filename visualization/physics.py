@@ -1,11 +1,12 @@
 import numpy as np
 
 class PhysicsObject:
-    def __init__(self, shape, mass=1.0):
+    def __init__(self, shape):
+        self.mass = None
         self.shape = shape
-        self.mass = mass
-        self.velocity = np.array([0.0, 0.0, 0.0], dtype=np.float32)
-        self.acceleration = np.array([0.0, 0.0, 0.0], dtype=np.float32)
+        self.velocity = np.random.uniform(-0.01, 0.01, size=3)
+
+
 
     def apply_force(self, force):
         self.acceleration += force / self.mass

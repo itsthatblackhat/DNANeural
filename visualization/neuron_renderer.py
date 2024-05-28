@@ -1,13 +1,11 @@
-from visualization.shader_sphere import ShaderSphereRenderer
-from visualization.shader_cube import ShaderCubeRenderer
+from OpenGL.GL import *
+from OpenGL.GLU import *
 
 class NeuronRenderer:
     def __init__(self):
-        self.sphere_renderer = ShaderSphereRenderer()
-        self.cube_renderer = ShaderCubeRenderer()
+        pass
 
-    def render(self, neuron_type):
-        if neuron_type == 'sphere':
-            self.sphere_renderer.render_sphere()
-        elif neuron_type == 'cube':
-            self.cube_renderer.render_cube()
+    def render_sphere(self):
+        quadric = gluNewQuadric()
+        gluSphere(quadric, 0.1, 20, 20)
+        gluDeleteQuadric(quadric)

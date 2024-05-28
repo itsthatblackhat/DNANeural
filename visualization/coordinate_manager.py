@@ -1,6 +1,5 @@
 import numpy as np
 
-
 class CoordinateManager:
     def __init__(self):
         self.positions = {}

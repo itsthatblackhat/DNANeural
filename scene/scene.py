@@ -5,7 +5,6 @@ class Scene:
     def add_object(self, obj):
         self.objects.append(obj)
 
-    def render(self):
+    def render(self, renderer):
         for obj in self.objects:
-            obj.draw()
-            print("Drew object at position:", obj.positions)
+            obj.draw(renderer)

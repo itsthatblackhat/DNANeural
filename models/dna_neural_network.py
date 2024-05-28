@@ -1,13 +1,13 @@
-# dna_neural_network.py
 import numpy as np
+from OpenGL.GL import *
+from ctypes import c_float
 
 class DNANeuralNetwork:
-    def __init__(self):
-        self.neurons = self.initialize_neurons()
+    def __init__(self, neurons, coord_manager):
+        self.neurons = neurons
+        self.coord_manager = coord_manager
         self.synapses = self.initialize_synapses()
-
-    def initialize_neurons(self):
-        return np.random.rand(100, 3) * 2 - 1  # 100 neurons with 3D positions
+        print(f"DNANeuralNetwork initialized with neurons: {neurons}")
 
     def initialize_synapses(self):
         synapses = []
@@ -17,6 +17,25 @@ class DNANeuralNetwork:
                     synapses.append((self.neurons[i], self.neurons[j]))
         return synapses
 
+    def update(self, dt):
+        for neuron in self.neurons:
+            neuron.update(dt)
+
+    def draw(self, renderer):
+        for neuron in self.neurons:
+            neuron.draw(renderer)
+        self.draw_synapses()
+
+    def draw_synapses(self):
+        glBegin(GL_LINES)
+        for start_neuron, end_neuron in self.synapses:
+            start_pos = np.array(start_neuron.position, dtype=c_float)
+            end_pos = np.array(end_neuron.position, dtype=c_float)
+            glVertex3fv(start_pos)
+            glVertex3fv(end_pos)
+        glEnd()
+
     def propagate_signals(self):
-        # This should be implemented with the logic for neural signal propagation
-        pass
+        for neuron in self.neurons:
+            neuron.update()
+            neuron.generate_action_potential()
