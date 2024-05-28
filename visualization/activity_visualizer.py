@@ -18,7 +18,15 @@ class ActivityVisualizer:
         self.dna_network.update(dt)
 
     def render(self):
-        self.dna_network.draw(self.renderer)
+        self.dna_network.draw(renderer=self.renderer)
+
+    def draw_synapses(self):
+        glBegin(GL_LINES)
+        for (start, end) in self.dna_network.synapses:
+            glColor3f(1.0, 1.0, 1.0)
+            glVertex3fv(start.position)
+            glVertex3fv(end.position)
+        glEnd()
 
 def main():
     pygame.init()

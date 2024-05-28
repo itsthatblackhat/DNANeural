@@ -5,12 +5,11 @@ from pygame import DOUBLEBUF, OPENGL
 from math import sin, cos, pi
 
 from visualization.activity_visualizer import ActivityVisualizer
-from network.input_handler import InputHandler
 from models.dna_neural_network import DNANeuralNetwork
-from neuron import Neuron
 from visualization.coordinate_manager import CoordinateManager
 from audio_listener import AudioListener
-from camera_listener import CameraListener
+from front_stage import setup_stage
+from visualization.shader_sphere import ShaderSphereRenderer
 
 def main():
     pygame.init()
@@ -18,7 +17,7 @@ def main():
     pygame.display.set_mode(display, DOUBLEBUF | OPENGL)
     glViewport(0, 0, display[0], display[1])
     glMatrixMode(GL_PROJECTION)
-    gluPerspective(45, (display[0] / display[1]), 0.1, 50.0)
+    gluPerspective(45, (display[0] / display[1]), 0.1, 100.0)
     glMatrixMode(GL_MODELVIEW)
     glClearColor(0.0, 0.0, 0.0, 1.0)
     glEnable(GL_DEPTH_TEST)
@@ -26,12 +25,9 @@ def main():
     print("OpenGL initialization complete")
 
     coord_manager = CoordinateManager()
-    neurons = [
-        Neuron((0.0, 0.0, 0.0), (1.0, 0.0, 0.0), 'sphere', coord_manager),
-        Neuron((1.0, 1.0, 1.0), (0.0, 1.0, 0.0), 'sphere', coord_manager),
-        Neuron((-1.0, -1.0, -1.0), (0.0, 0.0, 1.0), 'sphere', coord_manager)
-    ]
-    dna_network = DNANeuralNetwork(neurons, coord_manager)
+    shapes = setup_stage(coord_manager)
+
+    dna_network = DNANeuralNetwork([], coord_manager)
     visualizer = ActivityVisualizer(dna_network)
     print("Visualizer and DNA network initialization complete")
 
@@ -40,8 +36,9 @@ def main():
 
     clock = pygame.time.Clock()
     running = True
-    camera_pos = [0.0, 0.0, 5.0]  # Adjusted the camera position further back
+    camera_pos = [0.0, 0.0, -10.0]
     camera_rot = [0.0, 0.0]
+    renderer = ShaderSphereRenderer()  # Initialize your renderer here
 
     def handle_camera_movement(keys):
         move_speed = 0.02
@@ -85,6 +82,9 @@ def main():
         glRotatef(camera_rot[0], 1, 0, 0)
         glRotatef(camera_rot[1], 0, 1, 0)
         glTranslatef(-camera_pos[0], -camera_pos[1], -camera_pos[2])
+
+        for shape in shapes:
+            shape.draw(renderer)  # Pass the renderer to the draw method
 
         visualizer.update(dt)
         visualizer.render()

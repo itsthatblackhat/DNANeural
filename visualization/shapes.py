@@ -11,7 +11,7 @@ class Shape:
         self.physics = PhysicsObject(self)
         self.init_position()
 
-    def draw(self):
+    def draw(self, renderer=None):
         pass
 
     def apply_transformations(self):
@@ -33,7 +33,7 @@ class Point(Shape):
         self.y = y
         self.coord_manager.update_position(shape_id, (x, y, 0.0))
 
-    def draw(self):
+    def draw(self, renderer=None):
         self.apply_transformations()
         glBegin(GL_POINTS)
         glColor3f(*self.color)
@@ -48,7 +48,7 @@ class Line(Shape):
         self.end = end
         self.coord_manager.update_position(shape_id, start)
 
-    def draw(self):
+    def draw(self, renderer=None):
         self.apply_transformations()
         glBegin(GL_LINES)
         glColor3f(*self.color)
@@ -61,7 +61,7 @@ class Triangle(Shape):
     def __init__(self, color, shape_id, coord_manager):
         super().__init__(color, shape_id, coord_manager)
 
-    def draw(self):
+    def draw(self, renderer=None):
         self.apply_transformations()
         glBegin(GL_TRIANGLES)
         glColor3f(*self.color)
@@ -76,7 +76,7 @@ class Square(Shape):
     def __init__(self, color, shape_id, coord_manager):
         super().__init__(color, shape_id, coord_manager)
 
-    def draw(self):
+    def draw(self, renderer=None):
         self.apply_transformations()
         glBegin(GL_QUADS)
         glColor3f(*self.color)
@@ -92,7 +92,7 @@ class Cube(Shape):
     def __init__(self, color, shape_id, coord_manager):
         super().__init__(color, shape_id, coord_manager)
 
-    def draw(self):
+    def draw(self, renderer=None):
         self.apply_transformations()
         vertices = [
             [-1, -1, -1],
@@ -123,7 +123,7 @@ class Sphere(Shape):
     def __init__(self, color, shape_id, coord_manager):
         super().__init__(color, shape_id, coord_manager)
 
-    def draw(self):
+    def draw(self, renderer=None):
         self.apply_transformations()
         num_lats = 20
         num_longs = 20
@@ -154,7 +154,7 @@ class Pyramid(Shape):
     def __init__(self, color, shape_id, coord_manager):
         super().__init__(color, shape_id, coord_manager)
 
-    def draw(self):
+    def draw(self, renderer=None):
         self.apply_transformations()
         glBegin(GL_TRIANGLES)
         glColor3f(*self.color)
@@ -189,7 +189,7 @@ class Circle(Shape):
         self.radius = radius
         self.coord_manager.update_position(shape_id, (x, y, 0.0))
 
-    def draw(self):
+    def draw(self, renderer=None):
         self.apply_transformations()
         glBegin(GL_TRIANGLE_FAN)
         glColor3f(*self.color)
