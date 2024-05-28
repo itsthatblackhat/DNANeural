@@ -1,15 +1,23 @@
 from OpenGL.GL import *
 from math import sin, cos, pi
 
+from OpenGL.GLU import gluNewQuadric
+from OpenGL.raw.GLU import gluSphere
+
+
 class ShaderSphereRenderer:
     def __init__(self):
         pass
 
-    def render_sphere(self, color):
+    def render_sphere(self, color, radius=1.0, slices=16, stacks=16):
+        quadric = gluNewQuadric()
+        gluSphere(quadric, radius, slices, stacks)
+
         glColor3f(*color)
         num_lats = 20
         num_longs = 20
         radius = 1.0
+
 
         for i in range(0, num_lats + 1):
             lat0 = pi * (-0.5 + float(i - 1) / num_lats)

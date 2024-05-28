@@ -13,6 +13,7 @@ class ActivityVisualizer:
         self.renderer = ShaderSphereRenderer()
         print("ActivityVisualizer created with DNANeuralNetwork and ShaderSphereRenderer")
 
+
     def update(self, dt):
         self.dna_network.update(dt)
 

@@ -1,67 +1,28 @@
-import numpy as np
+# particle_system.py
 from OpenGL.GL import *
-from visualization.physics import PhysicsObject
-
-class Particle:
-    def __init__(self, position, velocity, color, lifetime, coord_manager, particle_id):
-        self.position = np.array(position, dtype=np.float32)
-        self.velocity = np.array(velocity, dtype=np.float32)
-        self.color = color
-        self.lifetime = lifetime
-        self.coord_manager = coord_manager
-        self.shape_id = particle_id  # Ensure shape_id is set for compatibility with PhysicsObject
-        self.physics = PhysicsObject(self)
-        self.coord_manager.update_position(self.shape_id, self.position)
-
-    def update(self, dt):
-        self.physics.update(dt)
-        self.lifetime -= dt
-
-    def draw(self):
-        self.apply_transformations()
-        glColor3f(*self.color)
-        glBegin(GL_POINTS)
-        glVertex3f(*self.position)
-        glEnd()
-        self.reset_transformations()
-
-    def apply_transformations(self):
-        transformation_matrix = self.coord_manager.get_transformation_matrix(self.shape_id)
-        glPushMatrix()
-        glMultMatrixf(transformation_matrix.T)
-
-    def reset_transformations(self):
-        glPopMatrix()
+from random import uniform
 
 class ParticleSystem:
-    def __init__(self, coord_manager, num_particles=100):
+    def __init__(self, coord_manager):
         self.coord_manager = coord_manager
-        self.particles = []
-        self.num_particles = num_particles
-        self.initialize_particles()
+        self.particles = self.create_particles(100)  # Create 100 particles
 
-    def initialize_particles(self):
-        for i in range(self.num_particles):
-            position = np.random.uniform(-1.0, 1.0, 3)
-            velocity = np.random.uniform(-0.1, 0.1, 3)
-            color = np.random.uniform(0.5, 1.0, 3)
-            lifetime = np.random.uniform(1.0, 5.0)
-            particle = Particle(position, velocity, color, lifetime, self.coord_manager, i + 1000)
-            self.particles.append(particle)
+    def create_particles(self, count):
+        particles = []
+        for _ in range(count):
+            position = [uniform(-1, 1), uniform(-1, 1), uniform(-1, 1)]
+            color = [uniform(0, 1), uniform(0, 1), uniform(0, 1)]
+            particles.append({'position': position, 'color': color})
+        return particles
 
     def update(self, dt):
         for particle in self.particles:
-            particle.update(dt)
-            if particle.lifetime <= 0:
-                self.reset_particle(particle)
+            # Update particle positions or other properties here if needed
+            pass
 
-    def reset_particle(self, particle):
-        particle.position = np.random.uniform(-1.0, 1.0, 3)
-        particle.velocity = np.random.uniform(-0.1, 0.1, 3)
-        particle.color = np.random.uniform(0.5, 1.0, 3)
-        particle.lifetime = np.random.uniform(1.0, 5.0)
-        self.coord_manager.update_position(particle.shape_id, particle.position)
-
-    def draw(self):
+    def render(self):
+        glBegin(GL_POINTS)
         for particle in self.particles:
-            particle.draw()
+            glColor3fv(particle['color'])
+            glVertex3fv(particle['position'])
+        glEnd()

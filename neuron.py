@@ -1,8 +1,5 @@
 import numpy as np
 from OpenGL.GL import *
-from OpenGL.GLUT import *
-from visualization.shader_sphere import ShaderSphereRenderer
-from visualization.physics import PhysicsObject
 
 class Neuron:
     def __init__(self, position, color, neuron_type, coord_manager):
@@ -16,6 +13,7 @@ class Neuron:
         self.coord_manager = coord_manager
         self.shape_id = id(self)
         self.init_position()
+        print(f"Neuron initialized at {position} with color {color} and type {neuron_type}")
 
     def add_dendrite(self, dendrite):
         self.dendrites.append(dendrite)
@@ -40,15 +38,15 @@ class Neuron:
                 if self.position[i] > 1 or self.position[i] < -1:
                     self.velocity[i] = -self.velocity[i]
             self.activated = False
-            self.coord_manager.update_position(self.shape_id, self.position)
 
     def draw(self, renderer):
-        transformation_matrix = self.coord_manager.get_transformation_matrix(self.shape_id)
         glPushMatrix()
-        glMultMatrixf(transformation_matrix.T)
-        renderer.render_sphere(self.color)
+        glTranslatef(*self.position)
+        glColor3fv(self.color)
+        if self.neuron_type == 'sphere':
+            renderer.render_sphere(self.color)
         glPopMatrix()
 
     def init_position(self):
         if self.shape_id not in self.coord_manager.positions:
-            self.coord_manager.update_position(self.shape_id, self.position)
+            self.coord_manager.update_position(self.shape_id, (0.0, 0.0, 0.0))

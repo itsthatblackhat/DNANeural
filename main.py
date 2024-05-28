@@ -40,7 +40,7 @@ def main():
 
     clock = pygame.time.Clock()
     running = True
-    camera_pos = [0.0, 0.0, -5.0]
+    camera_pos = [0.0, 0.0, 5.0]  # Adjusted the camera position further back
     camera_rot = [0.0, 0.0]
 
     def handle_camera_movement(keys):
@@ -85,10 +85,11 @@ def main():
         glRotatef(camera_rot[0], 1, 0, 0)
         glRotatef(camera_rot[1], 0, 1, 0)
         glTranslatef(-camera_pos[0], -camera_pos[1], -camera_pos[2])
+
         visualizer.update(dt)
         visualizer.render()
+
         pygame.display.flip()
-        print("Frame rendered")
 
     audio_listener.__del__()
     pygame.quit()
