@@ -1,10 +1,11 @@
 import pygame
 from OpenGL.GL import *
-from OpenGL.GLU import *
+from OpenGL.GLUT import *
 import numpy as np
+import svgpathtools as svg
 
 class Neuron:
-    def __init__(self, position, color, neuron_type, coord_manager):
+    def __init__(self, position, color, neuron_type, coord_manager, svg_file):
         self.position = np.array(position, dtype='float32')
         self.color = np.array(color, dtype='float32')
         self.velocity = np.random.uniform(-0.01, 0.01, size=3)
@@ -14,8 +15,14 @@ class Neuron:
         self.neuron_type = neuron_type
         self.coord_manager = coord_manager
         self.shape_id = id(self)
+        self.svg_file = svg_file
+        self.path_data = self.load_svg(svg_file)
         self.init_position()
         print(f"Neuron initialized at {position} with color {color} and type {neuron_type}")
+
+    def load_svg(self, filename):
+        paths, attributes = svg.svg2paths(filename)
+        return paths
 
     def add_dendrite(self, dendrite):
         self.dendrites.append(dendrite)
@@ -45,35 +52,20 @@ class Neuron:
         glPushMatrix()
         glTranslatef(*self.position)
         glColor3fv(self.color)
-        self.draw_soma()
-        self.draw_dendrites()
-        self.draw_axon()
+        glScalef(0.001, 0.001, 0.001)  # Further scale down the neuron
+        self.draw_svg_path()
         glPopMatrix()
 
-    def draw_soma(self):
-        glColor3fv(self.color)
-        quad = gluNewQuadric()
-        gluSphere(quad, 0.2, 20, 20)
-        gluDeleteQuadric(quad)
-
-    def draw_dendrites(self):
-        glColor3fv((0.0, 1.0, 0.0))
-        for _ in range(5):
-            angle = np.random.uniform(0, 2 * np.pi)
-            length = np.random.uniform(0.2, 0.5)
-            glBegin(GL_LINES)
-            glVertex3fv(self.position)
-            glVertex3fv(self.position + np.array([np.cos(angle) * length, np.sin(angle) * length, 0.0]))
-            glEnd()
-
-    def draw_axon(self):
-        glColor3fv((0.0, 0.0, 1.0))
-        glPushMatrix()
-        glTranslatef(0.0, -0.2, 0.0)
-        quad = gluNewQuadric()
-        gluCylinder(quad, 0.05, 0.05, 1.0, 20, 20)
-        gluDeleteQuadric(quad)
-        glPopMatrix()
+    def draw_svg_path(self):
+        glColor3f(*self.color)
+        glBegin(GL_LINES)
+        for path in self.path_data:
+            for segment in path:
+                if isinstance(segment, svg.path.CubicBezier):
+                    points = [segment.start, segment.control1, segment.control2, segment.end]
+                    for point in points:
+                        glVertex2f(point.real, point.imag)
+        glEnd()
 
     def init_position(self):
         if self.shape_id not in self.coord_manager.positions:
