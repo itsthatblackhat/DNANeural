@@ -21,7 +21,7 @@ def main():
     pygame.display.set_mode(display, DOUBLEBUF | OPENGL)
     glViewport(0, 0, display[0], display[1])
     glMatrixMode(GL_PROJECTION)
-    gluPerspective(45, (display[0] / display[1]), 0.1, 1000.0)  # Increased far plane for unlimited distance
+    gluPerspective(45, (display[0] / display[1]), 0.1, 1000.0)
     glMatrixMode(GL_MODELVIEW)
     glClearColor(0.0, 0.0, 0.0, 1.0)
     glEnable(GL_DEPTH_TEST)
@@ -39,12 +39,12 @@ def main():
 
     clock = pygame.time.Clock()
     running = True
-    camera_pos = [0.0, 0.0, -20.0]  # Start scooted back
+    camera_pos = [0.0, 0.0, -10.0]
     camera_rot = [0.0, 0.0]
 
     def handle_camera_movement(keys):
-        move_speed = 0.1  # Increased move speed for easier control
-        rotate_speed = 0.2  # Increased rotate speed for easier control
+        move_speed = 0.02
+        rotate_speed = 0.06
 
         if keys[pygame.K_w]:
             camera_pos[0] += move_speed * sin(camera_rot[1] * pi / 180)
