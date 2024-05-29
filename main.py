@@ -5,11 +5,12 @@ from pygame import DOUBLEBUF, OPENGL
 from math import sin, cos, pi
 
 from visualization.activity_visualizer import ActivityVisualizer
+from network.input_handler import InputHandler
 from models.dna_neural_network import DNANeuralNetwork
+from neuron import Neuron
 from visualization.coordinate_manager import CoordinateManager
 from audio_listener import AudioListener
-from front_stage import setup_stage
-from visualization.shader_sphere import ShaderSphereRenderer
+from camera_listener import CameraListener
 
 def main():
     pygame.init()
@@ -17,7 +18,7 @@ def main():
     pygame.display.set_mode(display, DOUBLEBUF | OPENGL)
     glViewport(0, 0, display[0], display[1])
     glMatrixMode(GL_PROJECTION)
-    gluPerspective(45, (display[0] / display[1]), 0.1, 100.0)
+    gluPerspective(45, (display[0] / display[1]), 0.1, 100.0)  # Increased far plane for unlimited distance
     glMatrixMode(GL_MODELVIEW)
     glClearColor(0.0, 0.0, 0.0, 1.0)
     glEnable(GL_DEPTH_TEST)
@@ -25,9 +26,12 @@ def main():
     print("OpenGL initialization complete")
 
     coord_manager = CoordinateManager()
-    shapes = setup_stage(coord_manager)
-
-    dna_network = DNANeuralNetwork([], coord_manager)
+    neurons = [
+        Neuron((0.0, 0.0, 0.0), (1.0, 0.0, 0.0), 'neuron', coord_manager),
+        Neuron((1.0, 1.0, 1.0), (0.0, 1.0, 0.0), 'neuron', coord_manager),
+        Neuron((-1.0, -1.0, -1.0), (0.0, 0.0, 1.0), 'neuron', coord_manager)
+    ]
+    dna_network = DNANeuralNetwork(neurons, coord_manager)
     visualizer = ActivityVisualizer(dna_network)
     print("Visualizer and DNA network initialization complete")
 
@@ -36,13 +40,12 @@ def main():
 
     clock = pygame.time.Clock()
     running = True
-    camera_pos = [0.0, 0.0, -10.0]
+    camera_pos = [0.0, 0.0, -5.0]
     camera_rot = [0.0, 0.0]
-    renderer = ShaderSphereRenderer()  # Initialize your renderer here
 
     def handle_camera_movement(keys):
-        move_speed = 0.02
-        rotate_speed = 0.06
+        move_speed = 0.01
+        rotate_speed = 0.04
 
         if keys[pygame.K_w]:
             camera_pos[0] += move_speed * sin(camera_rot[1] * pi / 180)
@@ -83,13 +86,11 @@ def main():
         glRotatef(camera_rot[1], 0, 1, 0)
         glTranslatef(-camera_pos[0], -camera_pos[1], -camera_pos[2])
 
-        for shape in shapes:
-            shape.draw(renderer)  # Pass the renderer to the draw method
-
         visualizer.update(dt)
         visualizer.render()
 
         pygame.display.flip()
+        print("Frame rendered")
 
     audio_listener.__del__()
     pygame.quit()
