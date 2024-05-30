@@ -52,8 +52,7 @@ class Neuron:
         glPushMatrix()
         glTranslatef(*self.position)
         glColor3fv(self.color)
-        scale_factor = 0.002 if self.neuron_type == 'motorneuron' else 0.005
-        glScalef(scale_factor, scale_factor, scale_factor)
+        glScalef(0.001, 0.001, 0.001)  # Adjusting scale for all neurons
         self.draw_svg_path()
         glPopMatrix()
 
