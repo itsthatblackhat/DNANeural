@@ -12,6 +12,7 @@ from visualization.coordinate_manager import CoordinateManager
 from audio_listener import AudioListener
 from camera_listener import CameraListener
 from math import *
+from visualization.grid_floor import GridFloor
 
 def main():
     pygame.init()
@@ -21,7 +22,7 @@ def main():
     pygame.display.set_mode(display, DOUBLEBUF | OPENGL)
     glViewport(0, 0, display[0], display[1])
     glMatrixMode(GL_PROJECTION)
-    gluPerspective(45, (display[0] / display[1]), 0.1, 1000.0)
+    gluPerspective(45, (display[0] / display[1]), 0.1, 10000.0)  # Adjust far clipping plane
     glMatrixMode(GL_MODELVIEW)
     glClearColor(0.0, 0.0, 0.0, 1.0)
     glEnable(GL_DEPTH_TEST)
@@ -29,7 +30,7 @@ def main():
     print("OpenGL initialization complete")
 
     coord_manager = CoordinateManager()
-    neurons = setup_stage(coord_manager)
+    neurons, _ = setup_stage(coord_manager)
     dna_network = DNANeuralNetwork(neurons, coord_manager)
     visualizer = ActivityVisualizer(dna_network)
     print("Visualizer and DNA network initialization complete")
@@ -37,14 +38,18 @@ def main():
     audio_listener = AudioListener()
     print("Audio listener initialized")
 
+    grid_floor = GridFloor()
+
     clock = pygame.time.Clock()
     running = True
-    camera_pos = [0.0, 0.0, -10.0]
+    camera_pos = [0.0, 0.0, 100.0]  # Start the camera further back
     camera_rot = [0.0, 0.0]
+    last_mouse_pos = pygame.mouse.get_pos()
+    pygame.mouse.set_visible(False)
 
     def handle_camera_movement(keys):
-        move_speed = 0.02
-        rotate_speed = 0.06
+        move_speed = 0.2
+        rotate_speed = 0.6
 
         if keys[pygame.K_w]:
             camera_pos[0] += move_speed * sin(camera_rot[1] * pi / 180)
@@ -67,6 +72,15 @@ def main():
         if keys[pygame.K_e]:
             camera_rot[1] += rotate_speed
 
+    def handle_mouse_movement():
+        nonlocal last_mouse_pos
+        mouse_pos = pygame.mouse.get_pos()
+        dx, dy = mouse_pos[0] - last_mouse_pos[0], mouse_pos[1] - last_mouse_pos[1]
+        last_mouse_pos = mouse_pos
+
+        camera_rot[0] += dy * 0.1
+        camera_rot[1] += dx * 0.1
+
     print("Entering main loop")
 
     while running:
@@ -78,6 +92,7 @@ def main():
 
         keys = pygame.key.get_pressed()
         handle_camera_movement(keys)
+        handle_mouse_movement()
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
         glLoadIdentity()
@@ -85,6 +100,7 @@ def main():
         glRotatef(camera_rot[1], 0, 1, 0)
         glTranslatef(-camera_pos[0], -camera_pos[1], -camera_pos[2])
 
+        grid_floor.draw(camera_pos)
         visualizer.update(dt)
         visualizer.render()
 
